@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class RobotStick extends Joystick { // Defines the joystick
 	double dead;
 	boolean buttonState[];
-	SmartDashboard Dash; // This updates now!
+	SmartDashboard Dash; // Test #2
 	
 
 	
