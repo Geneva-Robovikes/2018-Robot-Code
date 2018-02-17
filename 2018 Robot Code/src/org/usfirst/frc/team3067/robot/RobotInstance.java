@@ -92,7 +92,10 @@ public class RobotInstance { // Declares robot components
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			//RAISE LIFT HERE
+			while (!limTopA.get()) {
+				talLiftB.set(.5);
+			}
+			talLiftB.set(0);
 			while (gyroAngle < 90) {
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
@@ -134,7 +137,10 @@ public class RobotInstance { // Declares robot components
 		LeftEnc.setDistancePerPulse(distanceVal); 
 		RightEnc.setDistancePerPulse(distanceVal);
 		
-		//RAISE LIFT HERE
+		while (!limTopA.get()) {
+			talLiftB.set(.5);
+		}
+		talLiftB.set(0);
 		if(switchScale.charAt(0) == 'L') {
 			// Go to left side
 			while(LeftEnc.getDistance() < 12 && RightEnc.getDistance() < -12) { // Move off alliance wall
@@ -303,7 +309,10 @@ public class RobotInstance { // Declares robot components
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			//RAISE LIFT HERE
+			while (!limTopA.get()) {
+				talLiftB.set(.5);
+			}
+			talLiftB.set(0);
 			while (gyroAngle < -90) {
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);

@@ -39,6 +39,9 @@ public class Robot extends IterativeRobot { //class of methods called by FRC, na
 		case(2):
 			dozer.AutonomousPos2();
 			break;
+		case(3):
+			dozer.AutonomousPos3();
+			break; 
 		default:
 					
 		}
