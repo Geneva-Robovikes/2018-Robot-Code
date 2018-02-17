@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>FRC Dashboard</title>
+    <link href="css/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Anton" rel="stylesheet"> 
+</head>
+
+<body>
+    <div id="timer">2:15</div>
+    <header>
+        <!-- Tells whether robot is connected to dashboard. -->
+        <div id="robot-state">Unknown state</div>
+    </header>
+    <!-- You'll need to mess around with the CSS of #camera (found in css/style.css) to get it to work.
+        More explanation in that CSS rule. -->
+    <div id="camera"></div>
+    <!-- The main body of the dashboard, by default contains the gyro monitor and the robot diagram -->
+    <article>
+        <!-- Gyroscope -->
+        <svg id="gyro">
+            <circle cx="85" cy="85" r="83"></circle>
+            <circle cx="85" cy="85" r="50"></circle>
+            <rect id="gyro-arm" x="80" y="5" width="10" height="80"></rect>
+            <text id="gyro-number" x="90" y="115">0º</text>
+        </svg>
+        <!-- Example robot diagram, arm moves when encoder value changes -->
+        <svg id="robot-diagram" width="340" height="440">
+            <text x="80" y="0">Bot Diagram</text>
+            <rect id="robot-arm" x="50" y="175" width="180" height="30"></rect>
+            <rect x="220" y="20" width="40" height="390"></rect>
+            <circle cx="70" cy="380" r="40"></circle>
+            <circle cx="160" cy="380" r="40"></circle>
+            <circle cx="250" cy="380" r="40"></circle>
+            <rect x="55" y="340" width="30" height="60"></rect>
+            <rect x="145" y="340" width="30" height="60"></rect>
+            <rect x="235" y="340" width="30" height="60"></rect>
+            <rect x="20" y="20" width="280" height="20"></rect>
+            <rect x="20" y="330" width="280" height="20"></rect>
+            <rect x="20" y="390" width="280" height="20"></rect>
+            <rect x="20" y="20" width="20" height="390"></rect>
+            <rect x="280" y="20" width="20" height="390"></rect>
+            <rect x="10" y="325" width="120" height="90"></rect>
+            <rect x="190" y="325" width="120" height="90"></rect>
+            <text id="team" x="35" y="390" text-anchor="middle">30</text>
+            <text id="team" x="255" y="390" text-anchor="middle">67</text>
+        </svg>
+    </article>
+    <!-- The sidebar of the dashboard. Designed for smaller control elements like selection boxes and small buttons. -->
+    <aside>
+        <!-- Example button which toggles /SmartDashboard/exampleValue NetworkTables value.
+            The <p> below then says the value. -->
+        <div id="example-section">
+            <button id="example-button">Change example value</button>
+            <p id="example-readout">Value is undefined</p>
+        </div>
+        <!-- Autonomous selector -->
+        <div class="select-container">
+            <select id="auto-select">
+                <option>No auto modes found</option>
+                <!-- This gets populated by JS -->
+            </select>
+        </div>
+        <div>
+            <p>Adjust arm height</p>
+            <input id="arm-position" type="range" min="0" max="1200" value="770">
+        </div>
+    </aside>
+    <div id="login">
+        <input id="connect-address" type="text" value="localhost" disabled>
+        <button id="connect" disabled>Connecting</button>
+    </div>
+    <script src="networktables/networktables.js"></script>
+    <script src="connection.js"></script>
+    <script src="ui.js"></script>
+</body>
+
+</html>
