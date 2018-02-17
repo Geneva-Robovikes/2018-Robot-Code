@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.Encoder;
 public class RobotInstance { // Declares robot components
 	RobotStick stickoboyo;
 	Talon talLF, talRF, talLB, talRB, talGrabber, talLiftA, talLiftB; // front left, front right, back left, back right, grabber belt, lift A, lift B
-	//Solenoid solGrabber; 
+    Solenoid solGrabber; 
 	DigitalInput limTopA, limBottomA, limTopB, limBottomB;
 	Encoder LeftEnc, RightEnc;
 	ADXRS450_Gyro gyro;
@@ -25,6 +25,7 @@ public class RobotInstance { // Declares robot components
 	double autoSpeed;
 	double teleSpeed;
 	double gyroAngle;
+	String switchScale;
 		
 	public RobotInstance() { // Instantiate joystick, talons, encoders, limit switches, etc...
 		stickoboyo = new RobotStick(5);
@@ -37,7 +38,7 @@ public class RobotInstance { // Declares robot components
 		talLiftA   = new Talon(5);
 		talLiftB   = new Talon(6);
 		
-		//solGrabber = new Solenoid(0);
+		solGrabber = new Solenoid(0);
 		
 		limTopA    = new DigitalInput(0);
 		limBottomA = new DigitalInput(1);
@@ -53,31 +54,75 @@ public class RobotInstance { // Declares robot components
 		teleSpeed = 1; // SET TELEOP SPEED HERE
 		gyroAngle = 0;
 		
+		switchScale = DriverStation.getInstance().getGameSpecificMessage();
+		
 		LeftEnc.reset(); // Reset encoders when code is built
 		RightEnc.reset();
 		
 	}
 	
-	public void AutonomousDrive() { // Move forward, if starting on right or left
+	public void AutonomousPos1() { // Move forward, drop on switch if on side
 		double distanceVal = (8 * Math.PI)/360;
+		double Ldistance; // Left encoder distance accumulator
+		double Rdistance;
 		LeftEnc.reset(); // Reset encoders when method runs
 		RightEnc.reset();
 		LeftEnc.setDistancePerPulse(distanceVal); 
 		RightEnc.setDistancePerPulse(distanceVal);
-		while (LeftEnc.getDistance() < 140 && RightEnc.getDistance() < 140) {
-			talLF.set(autoSpeed);
-			talLB.set(autoSpeed);
-			talRF.set(-autoSpeed);
-			talRB.set(-autoSpeed);
+		if (switchScale.charAt(0) == 'R') { // If switch is on right
+			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {
+				talLF.set(autoSpeed);
+				talLB.set(autoSpeed);
+				talRF.set(-autoSpeed);
+				talRB.set(-autoSpeed);
+			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 		}
-		
-		talLF.set(0);
-		talLB.set(0);
-		talRF.set(0);
-		talRB.set(0);
+		else if (switchScale.charAt(0) == 'L') {
+			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {
+				talLF.set(autoSpeed);
+				talLB.set(autoSpeed);
+				talRF.set(-autoSpeed);
+				talRB.set(-autoSpeed);
+			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
+			//RAISE LIFT HERE
+			while (gyroAngle < 90) {
+				talLF.set(autoSpeed);
+				talLB.set(autoSpeed);
+				talRF.set(autoSpeed);
+				talRB.set(autoSpeed);
+			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
+			Ldistance = LeftEnc.getDistance();
+			Rdistance = RightEnc.getDistance();
+			while ((LeftEnc.getDistance() - Ldistance) < 35 && (RightEnc.getDistance() - Rdistance) < -35) {
+				talLF.set(autoSpeed);
+				talLB.set(autoSpeed);
+				talRF.set(autoSpeed);
+				talRB.set(autoSpeed);
+			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
+			talGrabber.set(.5);
+			solGrabber.set(false);
+			Timer.delay(1);
+			talGrabber.set(0);
+		}
 	}
 	
-	public void AutonomousSwitch() { // Drop crate on switch, if starting in middle
+	public void AutonomousPos2() { // Drop crate on switch, if starting in middle
 		
 		int rotateValue = 50;
 		double distanceVal = (8 * Math.PI)/360; // 1 rotation = 8pi inches
@@ -89,16 +134,20 @@ public class RobotInstance { // Declares robot components
 		LeftEnc.setDistancePerPulse(distanceVal); 
 		RightEnc.setDistancePerPulse(distanceVal);
 		
-		String switchScale = DriverStation.getInstance().getGameSpecificMessage(); // Returns which side of switch is yours
+		//RAISE LIFT HERE
 		if(switchScale.charAt(0) == 'L') {
 			// Go to left side
-			while(LeftEnc.getDistance() < 12 && RightEnc.getDistance() < 12) { // Move off alliance wall
+			while(LeftEnc.getDistance() < 12 && RightEnc.getDistance() < -12) { // Move off alliance wall
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
 				talRB.set(-autoSpeed);
 				System.out.println(LeftEnc.getDistance());
 			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
 			while(getGyroAngle() > -rotateValue) { // Rotate left
@@ -108,15 +157,23 @@ public class RobotInstance { // Declares robot components
 				talRB.set(-autoSpeed);
 				System.out.println(LeftEnc.getDistance());
 			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
-			while((LeftEnc.getDistance() - Ldistance) < 60 && (RightEnc.getDistance() - Rdistance) < 60) { // Move until even with switch
+			while((LeftEnc.getDistance() - Ldistance) < 60 && (RightEnc.getDistance() - Rdistance) < -60) { // Move until even with switch
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
 				talRB.set(-autoSpeed);
 				System.out.println(LeftEnc.getDistance());
 			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
 			while(getGyroAngle() < rotateValue) { // Rotate right
@@ -126,9 +183,13 @@ public class RobotInstance { // Declares robot components
 				talRB.set(autoSpeed);
 				System.out.println(LeftEnc.getDistance());
 			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
-			while((LeftEnc.getDistance() - Ldistance) < 104 && (RightEnc.getDistance() - Rdistance) < 104) { // Move until at switch
+			while((LeftEnc.getDistance() - Ldistance) < 80 && (RightEnc.getDistance() - Rdistance) < -80) { // Move until at switch
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
@@ -147,12 +208,16 @@ public class RobotInstance { // Declares robot components
 		
 		else if (switchScale.charAt(0) == 'R') {
 			// Go to right side
-			while(LeftEnc.getDistance() < 12 && RightEnc.getDistance() < 12) { // Move off alliance wall
+			while(LeftEnc.getDistance() < 12 && RightEnc.getDistance() < -12) { // Move off alliance wall
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
 				talRB.set(-autoSpeed);		
 			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
 			while(getGyroAngle() < rotateValue) {// Rotate right
@@ -161,14 +226,22 @@ public class RobotInstance { // Declares robot components
 				talRF.set(autoSpeed);
 				talRB.set(autoSpeed);
 			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
-			while((LeftEnc.getDistance() - Ldistance) < 60 && (RightEnc.getDistance() - Rdistance) < 60) { // Move until even with switch
+			while((LeftEnc.getDistance() - Ldistance) < 60 && (RightEnc.getDistance() - Rdistance) < -60) { // Move until even with switch
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
 				talRB.set(-autoSpeed);		
 			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
 			while(getGyroAngle() > -rotateValue) { // Rotate left
@@ -177,27 +250,95 @@ public class RobotInstance { // Declares robot components
 				talRF.set(-autoSpeed);
 				talRB.set(-autoSpeed);
 			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
-			while((LeftEnc.getDistance() - Ldistance) < 104 && (RightEnc.getDistance() - Rdistance) < 104) { // Move until at switch
+			while((LeftEnc.getDistance() - Ldistance) < 80 && (RightEnc.getDistance() - Rdistance) < -80) { // Move until at switch
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
 				talRB.set(-autoSpeed);
 			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
 			talGrabber.set(.5); // Drop cube
-			//solGrabber.set(false); 
+			solGrabber.set(false); 
 			Timer.delay(1);
 			talGrabber.set(0); // End auto
 		}
 	} 
+	public void AutonomousPos3() { // Move forward, drop on switch if on side
+		double distanceVal = (8 * Math.PI)/360;
+		double Ldistance; // Left encoder distance accumulator
+		double Rdistance;
+		LeftEnc.reset(); // Reset encoders when method runs
+		RightEnc.reset();
+		LeftEnc.setDistancePerPulse(distanceVal); 
+		RightEnc.setDistancePerPulse(distanceVal);
+		if (switchScale.charAt(0) == 'L') { // If switch is on right
+			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {
+				talLF.set(autoSpeed);
+				talLB.set(autoSpeed);
+				talRF.set(-autoSpeed);
+				talRB.set(-autoSpeed);
+			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
+		}
+		else if (switchScale.charAt(0) == 'R') {
+			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {
+				talLF.set(autoSpeed);
+				talLB.set(autoSpeed);
+				talRF.set(-autoSpeed);
+				talRB.set(-autoSpeed);
+			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
+			//RAISE LIFT HERE
+			while (gyroAngle < -90) {
+				talLF.set(autoSpeed);
+				talLB.set(autoSpeed);
+				talRF.set(autoSpeed);
+				talRB.set(autoSpeed);
+			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
+			Ldistance = LeftEnc.getDistance();
+			Rdistance = RightEnc.getDistance();
+			while ((LeftEnc.getDistance() - Ldistance) < 35 && (RightEnc.getDistance() - Rdistance) < -35) {
+				talLF.set(autoSpeed);
+				talLB.set(autoSpeed);
+				talRF.set(autoSpeed);
+				talRB.set(autoSpeed);
+			}
+			talLF.set(0);
+			talLB.set(0);
+			talRF.set(0);
+			talRB.set(0);
+			talGrabber.set(.5);
+			solGrabber.set(false);
+			Timer.delay(1);
+			talGrabber.set(0);
+		}
+	}
 	
 	public void update() { // What runs in teleopPeriodic
 
-		//setMotor(); // Sets drive motors
-		//grabberGrab(); // Sets grabber motors
+		setMotor(); // Sets drive motors
+		grabberGrab(); // Sets grabber motors
 		//grabbersolGrabber(); // Sets grabber solenoid
-		//lift(); // Sets lift motors
+		lift(); // Sets lift motors
 		getGyroAngle();
 		SmartDashboard.updateValues();
 		
@@ -212,8 +353,8 @@ public class RobotInstance { // Declares robot components
 		Timer.delay(.001); // Sets a uniform delay for calculation
 		if (gyro.getRate() >= 1 || gyro.getRate() <= -1) { // Deadzone; prevents slight input
 			gyroAngle += (gyro.getRate() * .001) * 20;
-			SmartDashboard.putNumber("gyroAngle", gyroAngle);
-			System.out.println(gyroAngle + "    " + SmartDashboard.getNumber("gyroAngle", 699));// Increments gyroAngle by rate * time
+			//SmartDashboard.putNumber("gyroAngle", gyroAngle);
+			//System.out.println(gyroAngle + "    " + SmartDashboard.getNumber("gyroAngle", 699));// Increments gyroAngle by rate * time
 		}
 		
 		return gyroAngle; // Returns the current gyro angle
