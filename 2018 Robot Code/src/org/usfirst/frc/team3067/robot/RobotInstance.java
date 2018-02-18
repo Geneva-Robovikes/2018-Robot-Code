@@ -3,7 +3,7 @@ package org.usfirst.frc.team3067.robot;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.AnalogGyro;
+
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,6 +24,8 @@ public class RobotInstance { // Declares robot components
 	double outputB;
 	double autoSpeed;
 	double teleSpeed;
+	double liftSpeed;
+	double grabberSpeed;
 	double gyroAngle;
 	String switchScale;
 		
@@ -52,6 +54,8 @@ public class RobotInstance { // Declares robot components
 		
 		autoSpeed = -.2; // SET AUTONOMOUS SPEED HERE
 		teleSpeed = 1; // SET TELEOP SPEED HERE
+		liftSpeed = .5;
+		grabberSpeed  = .2;
 		gyroAngle = 0;
 		
 		switchScale = DriverStation.getInstance().getGameSpecificMessage();
@@ -61,7 +65,7 @@ public class RobotInstance { // Declares robot components
 		
 	}
 	
-	public void AutonomousPos1() { // Move forward, drop on switch if on side
+	public void AutonomousPos1() { //If we are staring in position 1 (far left)
 		double distanceVal = (8 * Math.PI)/360;
 		double Ldistance; // Left encoder distance accumulator
 		double Rdistance;
@@ -70,7 +74,7 @@ public class RobotInstance { // Declares robot components
 		LeftEnc.setDistancePerPulse(distanceVal); 
 		RightEnc.setDistancePerPulse(distanceVal);
 		if (switchScale.charAt(0) == 'R') { // If switch is on right
-			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {
+			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {//Move forward across base line
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
@@ -81,8 +85,8 @@ public class RobotInstance { // Declares robot components
 			talRF.set(0);
 			talRB.set(0);
 		}
-		else if (switchScale.charAt(0) == 'L') {
-			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {
+		else if (switchScale.charAt(0) == 'L') {//If switch is on left
+			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {//Move forward until in line with switch
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
@@ -92,11 +96,11 @@ public class RobotInstance { // Declares robot components
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			while (!limTopA.get()) {
-				talLiftB.set(.5);
+			while (!limTopA.get()) { //Raise lift
+				talLiftB.set(liftSpeed);
 			}
 			talLiftB.set(0);
-			while (gyroAngle < 90) {
+			while (gyroAngle < 90) { //Rotate right
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(autoSpeed);
@@ -108,24 +112,24 @@ public class RobotInstance { // Declares robot components
 			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
-			while ((LeftEnc.getDistance() - Ldistance) < 35 && (RightEnc.getDistance() - Rdistance) < -35) {
+			while ((LeftEnc.getDistance() - Ldistance) < 35 && (RightEnc.getDistance() - Rdistance) < -35) {//Move forward until directly next to switch
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
-				talRF.set(autoSpeed);
-				talRB.set(autoSpeed);
+				talRF.set(-autoSpeed);
+				talRB.set(-autoSpeed);
 			}
 			talLF.set(0);
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			talGrabber.set(.5);
+			talGrabber.set(liftSpeed); //Drop cube
 			solGrabber.set(false);
 			Timer.delay(1);
 			talGrabber.set(0);
 		}
 	}
 	
-	public void AutonomousPos2() { // Drop crate on switch, if starting in middle
+	public void AutonomousPos2() { //If we are staring in position 2 (middle)
 		
 		int rotateValue = 50;
 		double distanceVal = (8 * Math.PI)/360; // 1 rotation = 8pi inches
@@ -138,10 +142,10 @@ public class RobotInstance { // Declares robot components
 		RightEnc.setDistancePerPulse(distanceVal);
 		
 		while (!limTopA.get()) {
-			talLiftB.set(.5);
+			talLiftB.set(liftSpeed);
 		}
 		talLiftB.set(0);
-		if(switchScale.charAt(0) == 'L') {
+		if(switchScale.charAt(0) == 'L') {//If switch is on left
 			// Go to left side
 			while(LeftEnc.getDistance() < 12 && RightEnc.getDistance() < -12) { // Move off alliance wall
 				talLF.set(autoSpeed);
@@ -206,13 +210,13 @@ public class RobotInstance { // Declares robot components
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			talGrabber.set(.5); // Drop cube
+			talGrabber.set(liftSpeed); // Drop cube
 			//solGrabber.set(false);
 			Timer.delay(1);
 			talGrabber.set(0); // End auto
 		}
 		
-		else if (switchScale.charAt(0) == 'R') {
+		else if (switchScale.charAt(0) == 'R') {//If switch is on right
 			// Go to right side
 			while(LeftEnc.getDistance() < 12 && RightEnc.getDistance() < -12) { // Move off alliance wall
 				talLF.set(autoSpeed);
@@ -272,13 +276,13 @@ public class RobotInstance { // Declares robot components
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			talGrabber.set(.5); // Drop cube
+			talGrabber.set(liftSpeed); // Drop cube
 			solGrabber.set(false); 
 			Timer.delay(1);
 			talGrabber.set(0); // End auto
 		}
 	} 
-	public void AutonomousPos3() { // Move forward, drop on switch if on side
+	public void AutonomousPos3() { //If we are staring in position 3 (far right)
 		double distanceVal = (8 * Math.PI)/360;
 		double Ldistance; // Left encoder distance accumulator
 		double Rdistance;
@@ -286,8 +290,8 @@ public class RobotInstance { // Declares robot components
 		RightEnc.reset();
 		LeftEnc.setDistancePerPulse(distanceVal); 
 		RightEnc.setDistancePerPulse(distanceVal);
-		if (switchScale.charAt(0) == 'L') { // If switch is on right
-			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {
+		if (switchScale.charAt(0) == 'L') { //If switch is on left
+			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) { //Move forward across base line
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
@@ -298,8 +302,8 @@ public class RobotInstance { // Declares robot components
 			talRF.set(0);
 			talRB.set(0);
 		}
-		else if (switchScale.charAt(0) == 'R') {
-			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) {
+		else if (switchScale.charAt(0) == 'R') { //If switch is on right
+			while (LeftEnc.getDistance() < 154 && RightEnc.getDistance() < -154) { //Move forward until in line with switch
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(-autoSpeed);
@@ -309,15 +313,15 @@ public class RobotInstance { // Declares robot components
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			while (!limTopA.get()) {
-				talLiftB.set(.5);
+			while (!limTopA.get()) { //Raise lift
+				talLiftB.set(liftSpeed);
 			}
 			talLiftB.set(0);
-			while (gyroAngle < -90) {
-				talLF.set(autoSpeed);
-				talLB.set(autoSpeed);
-				talRF.set(autoSpeed);
-				talRB.set(autoSpeed);
+			while (gyroAngle > -90) {//Rotate left
+				talLF.set(-autoSpeed);
+				talLB.set(-autoSpeed);
+				talRF.set(-autoSpeed);
+				talRB.set(-autoSpeed);
 			}
 			talLF.set(0);
 			talLB.set(0);
@@ -325,7 +329,7 @@ public class RobotInstance { // Declares robot components
 			talRB.set(0);
 			Ldistance = LeftEnc.getDistance();
 			Rdistance = RightEnc.getDistance();
-			while ((LeftEnc.getDistance() - Ldistance) < 35 && (RightEnc.getDistance() - Rdistance) < -35) {
+			while ((LeftEnc.getDistance() - Ldistance) < 35 && (RightEnc.getDistance() - Rdistance) < -35) { //Move forward until directly next to switch
 				talLF.set(autoSpeed);
 				talLB.set(autoSpeed);
 				talRF.set(autoSpeed);
@@ -335,7 +339,7 @@ public class RobotInstance { // Declares robot components
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			talGrabber.set(.5);
+			talGrabber.set(liftSpeed); //Drop cube
 			solGrabber.set(false);
 			Timer.delay(1);
 			talGrabber.set(0);
@@ -380,10 +384,10 @@ public class RobotInstance { // Declares robot components
 	public void grabberGrab() { // Spins belt in/out
 		talGrabber.set(0);
 		if(stickoboyo.getButton(1) && !stickoboyo.getButton(2)) {
-			talGrabber.set(.2);
+			talGrabber.set(grabberSpeed);
 		}
 		if(!stickoboyo.getButton(1) && stickoboyo.getButton(2)) {
-			talGrabber.set(-.2);
+			talGrabber.set(-grabberSpeed);
 		}
 	}
 	
@@ -398,16 +402,16 @@ public class RobotInstance { // Declares robot components
 		outputB = 0; // How fast B motor spins
 		// A section
 		if(stickoboyo.getButton(4) && !stickoboyo.getButton(6) && !limBottomA.get()) {
-			outputA = -0.5; // down
+			outputA = -liftSpeed; // down
 		} else if(!stickoboyo.getButton(4) && stickoboyo.getButton(6) && !limTopA.get()) {
-			outputA = 0.5; // up
+			outputA = liftSpeed; // up
 		}
 		
 		// B section
 		if(stickoboyo.getButton(4) && !stickoboyo.getButton(6) && !limBottomB.get()) {
-			outputB = -0.5; // down
+			outputB = -liftSpeed; // down
 		} else if(!stickoboyo.getButton(4) && stickoboyo.getButton(6) && !limTopB.get()) {
-			outputB = 0.5; // up
+			outputB = liftSpeed; // up
 		}
 		// Set motor speed at end
 		talLiftA.set(outputA);
