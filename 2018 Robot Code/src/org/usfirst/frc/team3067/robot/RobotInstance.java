@@ -22,10 +22,10 @@ public class RobotInstance { // Declares robot components
 	SmartDashboard dashBoard;
 	double outputA;
 	double outputB;
-	double autoSpeed;
-	double teleSpeed;
-	double liftSpeed;
-	double grabberSpeed;
+	final double autoSpeed;
+	final double teleSpeed;
+	final double liftSpeed;
+	final double grabberSpeed;
 	double gyroAngle;
 	String switchScale;
 		
@@ -54,8 +54,9 @@ public class RobotInstance { // Declares robot components
 		
 		autoSpeed = -.2; // SET AUTONOMOUS SPEED HERE
 		teleSpeed = 1; // SET TELEOP SPEED HERE
-		liftSpeed = .5;
-		grabberSpeed  = .2;
+		liftSpeed = .5; // SET LIFT SPEED HERE
+		grabberSpeed  = .2; // SET GRABBER SPEED HERE
+		
 		gyroAngle = 0;
 		
 		switchScale = DriverStation.getInstance().getGameSpecificMessage();
@@ -282,6 +283,7 @@ public class RobotInstance { // Declares robot components
 			talGrabber.set(0); // End auto
 		}
 	} 
+	
 	public void AutonomousPos3() { //If we are staring in position 3 (far right)
 		double distanceVal = (8 * Math.PI)/360;
 		double Ldistance; // Left encoder distance accumulator
@@ -366,7 +368,7 @@ public class RobotInstance { // Declares robot components
 		Timer.delay(.001); // Sets a uniform delay for calculation
 		if (gyro.getRate() >= 1 || gyro.getRate() <= -1) { // Deadzone; prevents slight input
 			gyroAngle += (gyro.getRate() * .001) * 20;
-			//SmartDashboard.putNumber("gyroAngle", gyroAngle);
+			SmartDashboard.putNumber("gyroAngle", gyroAngle);
 			//System.out.println(gyroAngle + "    " + SmartDashboard.getNumber("gyroAngle", 699));// Increments gyroAngle by rate * time
 		}
 		
@@ -383,10 +385,10 @@ public class RobotInstance { // Declares robot components
 	
 	public void grabberGrab() { // Spins belt in/out
 		talGrabber.set(0);
-		if(stickoboyo.getButton(1) && !stickoboyo.getButton(2)) {
+		if(stickoboyo.getButton(2) && !stickoboyo.getButton(1)) {
 			talGrabber.set(grabberSpeed);
 		}
-		if(!stickoboyo.getButton(1) && stickoboyo.getButton(2)) {
+		if(!stickoboyo.getButton(2) && stickoboyo.getButton(1)) {
 			talGrabber.set(-grabberSpeed);
 		}
 	}
