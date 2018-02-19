@@ -15,7 +15,8 @@ import edu.wpi.first.wpilibj.Encoder;
 public class RobotInstance { // Declares robot components
 	RobotStick stickoboyo;
 	Talon talLF, talRF, talLB, talRB, talGrabber, talLiftA, talLiftB; // front left, front right, back left, back right, grabber belt, lift A, lift B
-    Solenoid solGrabber; 
+    Solenoid solGrabber1;
+    Solenoid solGrabber2;
 	DigitalInput limTopA, limBottomA, limTopB, limBottomB;
 	Encoder LeftEnc, RightEnc;
 	ADXRS450_Gyro gyro;
@@ -40,7 +41,8 @@ public class RobotInstance { // Declares robot components
 		talLiftA   = new Talon(5);
 		talLiftB   = new Talon(6);
 		
-		solGrabber = new Solenoid(0);
+		solGrabber1 = new Solenoid(0);
+		solGrabber2 = new Solenoid(1);
 		
 		limTopA    = new DigitalInput(0);
 		limBottomA = new DigitalInput(1);
@@ -58,6 +60,7 @@ public class RobotInstance { // Declares robot components
 		grabberSpeed  = .2; // SET GRABBER SPEED HERE
 		
 		gyroAngle = 0;
+		
 		
 		switchScale = DriverStation.getInstance().getGameSpecificMessage();
 		
@@ -97,7 +100,7 @@ public class RobotInstance { // Declares robot components
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			while (!limTopA.get()) { //Raise lift
+			while (!limTopB.get()) { //Raise lift
 				talLiftB.set(liftSpeed);
 			}
 			talLiftB.set(0);
@@ -124,7 +127,7 @@ public class RobotInstance { // Declares robot components
 			talRF.set(0);
 			talRB.set(0);
 			talGrabber.set(liftSpeed); //Drop cube
-			solGrabber.set(false);
+			solGrabber1.set(false);
 			Timer.delay(1);
 			talGrabber.set(0);
 		}
@@ -212,7 +215,7 @@ public class RobotInstance { // Declares robot components
 			talRF.set(0);
 			talRB.set(0);
 			talGrabber.set(liftSpeed); // Drop cube
-			//solGrabber.set(false);
+			//solGrabber1.set(false);
 			Timer.delay(1);
 			talGrabber.set(0); // End auto
 		}
@@ -278,7 +281,7 @@ public class RobotInstance { // Declares robot components
 			talRF.set(0);
 			talRB.set(0);
 			talGrabber.set(liftSpeed); // Drop cube
-			solGrabber.set(false); 
+			solGrabber1.set(false); 
 			Timer.delay(1);
 			talGrabber.set(0); // End auto
 		}
@@ -315,7 +318,7 @@ public class RobotInstance { // Declares robot components
 			talLB.set(0);
 			talRF.set(0);
 			talRB.set(0);
-			while (!limTopA.get()) { //Raise lift
+			while (!limTopB.get()) { //Raise lift
 				talLiftB.set(liftSpeed);
 			}
 			talLiftB.set(0);
@@ -342,7 +345,7 @@ public class RobotInstance { // Declares robot components
 			talRF.set(0);
 			talRB.set(0);
 			talGrabber.set(liftSpeed); //Drop cube
-			solGrabber.set(false);
+			solGrabber1.set(false);
 			Timer.delay(1);
 			talGrabber.set(0);
 		}
@@ -352,7 +355,7 @@ public class RobotInstance { // Declares robot components
 
 		setMotor(); // Sets drive motors
 		grabberGrab(); // Sets grabber motors
-		//grabbersolGrabber(); // Sets grabber solenoid
+		grabberSol(); // Sets grabber solenoid
 		lift(); // Sets lift motors
 		getGyroAngle();
 		SmartDashboard.updateValues();
@@ -360,8 +363,9 @@ public class RobotInstance { // Declares robot components
 		
 	}
 	
-	public void clearGyroAngle() { // Clears gyro angle
+	public void resetValues() { // Clears gyro angle
 		gyroAngle = 0;
+		
 	}
 	
 	public double getGyroAngle() { // Gets and sets gyro angle simultaneously -- !!ONLY RUN ONCE PER CYCLE!!
@@ -393,10 +397,13 @@ public class RobotInstance { // Declares robot components
 		}
 	}
 	
-	public void grabbersolGrabber() { // Grabber pneumatics
+	public void grabberSol() { // Grabber pneumatics
 		if(stickoboyo.getButtonDown(3)) {
-			//solGrabber.set(stickoboyo.getButtonToggle(3));
+			boolean val = stickoboyo.getButtonToggle(3);
+			solGrabber1.set(val);
+			solGrabber2.set(val);
 		}
+		
 	}
 	
 	public void lift() {

@@ -53,9 +53,7 @@ public class RobotStick extends Joystick { // Defines the joystick
 	}
 	
 	public boolean getButtonToggle(int button) { // Toggle input on press
-		if (this.getRawButtonPressed(button)) {
-			buttonState[button] = !buttonState[button];
-		}
+		buttonState[button] = !buttonState[button];
 		return buttonState[button];
 	}
 	

@@ -53,7 +53,7 @@ public class Robot extends IterativeRobot { //class of methods called by FRC, na
 	
 	}
 	public void teleopInit() {
-		dozer.clearGyroAngle();
+		dozer.resetValues();
 
 	}
 	public void teleopPeriodic() {
