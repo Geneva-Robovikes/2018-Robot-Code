@@ -57,7 +57,7 @@ public class RobotStick extends Joystick { // Defines the joystick
 		return buttonState[button];
 	}
 	
-	public boolean getButtonDown(int button) { // Executes once when button is pressed
+	public boolean getButtonPress(int button) { // Executes once when button is pressed
 		return this.getRawButtonPressed(button);
 	}
 	
