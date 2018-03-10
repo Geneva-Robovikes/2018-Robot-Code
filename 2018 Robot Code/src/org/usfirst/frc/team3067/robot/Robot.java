@@ -22,8 +22,9 @@ public class Robot extends IterativeRobot { //class of methods called by FRC, na
 		
 		dozer = new RobotInstance();
 		autoChooser = new SendableChooser();
-		autoChooser.addDefault("Go forward", 1);
-		autoChooser.addObject("Box on switch", 2);
+		autoChooser.addDefault("Position 1", 1);
+		autoChooser.addObject("Position 2", 2);
+		autoChooser.addObject("Position 3", 3);
 		SmartDashboard.putData("Autonomous mode chooser", autoChooser);
 		SmartDashboard.putNumber("Camera port", CameraServer.kBasePort);
 		//dashTable = NetworkTableInstance.create();
@@ -33,11 +34,14 @@ public class Robot extends IterativeRobot { //class of methods called by FRC, na
 		
 		switch((int)autoChooser.getSelected()) {
 		case(1):
-			dozer.AutonomousDrive();
+			dozer.AutonomousPos1();
 			break;
 		case(2):
-			dozer.AutonomousSwitch();
+			dozer.AutonomousPos2();
 			break;
+		case(3):
+			dozer.AutonomousPos3();
+			break; 
 		default:
 					
 		}
@@ -49,7 +53,7 @@ public class Robot extends IterativeRobot { //class of methods called by FRC, na
 	
 	}
 	public void teleopInit() {
-		dozer.clearGyroAngle();
+		dozer.resetValues();
 
 	}
 	public void teleopPeriodic() {
