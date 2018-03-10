@@ -26,21 +26,23 @@ public class RobotInstance { // Declares robot components
 	final double autoSpeed;
 	double teleSpeed;
 	double turnSpeed;
+	double driveSmoothing;
 	final double liftSpeed;
 	final double grabberSpeed;
 	double gyroAngle;
 	String switchScale;
-		
+	boolean smoothSteering;
+	
 	public RobotInstance() { // Instantiate joystick, talons, encoders, limit switches, etc...
 		stickoboyo = new RobotStick(5);
 		
-		talLF      = new Talon(0);
-		talLB      = new Talon(1);
-		talRF      = new Talon(2);
-		talRB      = new Talon(3);
-		talGrabber = new Talon(4);
-		talLiftA   = new Talon(5);
-		talLiftB   = new Talon(6);
+		talLF      = new Talon(0); //0
+		talLB      = new Talon(1); //1
+		talRF      = new Talon(2); //2
+		talRB      = new Talon(3); //3
+		talLiftA   = new Talon(4); //5
+		talLiftB   = new Talon(5); //4
+		talGrabber = new Talon(6); //6
 		
 		solGrabber1 = new Solenoid(0);
 		solGrabber2 = new Solenoid(1);
@@ -55,11 +57,14 @@ public class RobotInstance { // Declares robot components
 		
 		gyro = new ADXRS450_Gyro(Port.kOnboardCS0);
 		
-		autoSpeed = .2; // SET AUTONOMOUS SPEED HERE
-		teleSpeed = .5; // SET TELEOP SPEED HERE
+		autoSpeed = 0.2; // SET AUTONOMOUS SPEED HERE
+		teleSpeed = 0.5; // SET TELEOP SPEED HERE
+		turnSpeed = 0.8; // SET TURN SPEED HERE
 		liftSpeed = 1; // SET LIFT SPEED HERE
-		grabberSpeed  = .2; // SET GRABBER SPEED HERE
-		SmartDashboard.putNumber("teleSpeed", teleSpeed);
+		grabberSpeed  = 0.2; // SET GRABBER SPEED HERE
+		
+		driveSmoothing = 0.3;
+		smoothSteering = true;
 		
 		gyroAngle = 0;
 		
@@ -68,7 +73,7 @@ public class RobotInstance { // Declares robot components
 		
 		LeftEnc.reset(); // Reset encoders when code is built
 		RightEnc.reset();
-		
+		SmartDashUpdate();
 	}
 	
 	public void AutonomousPos1() { //If we are staring in position 1 (far left)
@@ -354,14 +359,19 @@ public class RobotInstance { // Declares robot components
 	}
 	
 	public void update() { // What runs in teleopPeriodic
-		teleSpeed = SmartDashboard.getNumber("teleSpeed", 0.5);
-		turnSpeed = SmartDashboard.getNumber("turnSpeed", 0.5);
-		setMotor(); // Sets drive motors
-		grabberGrab(); // Sets grabber motors
-		grabberSol(); // Sets grabber solenoid
+		//teleSpeed = SmartDashboard.getNumber("teleSpeed", 0.5);
+		//turnSpeed = SmartDashboard.getNumber("turnSpeed", 0.5);
+		//driveSmoothing = SmartDashboard.getNumber("smoothing", driveSmoothing);
+		//smoothSteering = SmartDashboard.getBoolean("smoothSteering", true);
+		//if (smoothSteering) {
+			//setMotorSmooth(); // Sets drive motors
+	//	} else {
+			//setMotorStandard();
+	//	}
+		//grabberGrab(); // Sets grabber motors
+		//grabberSol(); // Sets grabber solenoid
 		lift(); // Sets lift motors
-		SmartDashboard.putNumber("gyroAngle", getGyroAngle());
-		SmartDashboard.updateValues();
+		//SmartDashUpdate();
 		
 		
 	}
@@ -382,12 +392,26 @@ public class RobotInstance { // Declares robot components
 		return gyroAngle; // Returns the current gyro angle
 	}
 	
-	public void setMotor() { // Arcade drive
+	public double scaleMotor(double stickInput, Talon talon) {		
+		double newMotorValue = talon.get() * (1 - driveSmoothing) + stickInput * driveSmoothing; 
+		if (newMotorValue < .02 && newMotorValue > -.02)
+			return 0;
+		else
+			return newMotorValue;
+	}	
+	
+	public void setMotorSmooth() { // Arcade drive
+		talLF.set(scaleMotor(teleSpeed * -stickoboyo.getDY() + turnSpeed * stickoboyo.getDZ(), talLF));
+		talLB.set(scaleMotor(teleSpeed * -stickoboyo.getDY() + turnSpeed * stickoboyo.getDZ(), talLB));
+		talRF.set(scaleMotor(teleSpeed * stickoboyo.getDY() + turnSpeed * stickoboyo.getDZ(),  talRF));
+		talRB.set(scaleMotor(teleSpeed * stickoboyo.getDY() + turnSpeed * stickoboyo.getDZ(),  talRB));		
+	}
+	
+	public void setMotorStandard() {
 		talLF.set(teleSpeed * -stickoboyo.getDY() + turnSpeed * stickoboyo.getDZ());
 		talLB.set(teleSpeed * -stickoboyo.getDY() + turnSpeed * stickoboyo.getDZ());
 		talRF.set(teleSpeed * stickoboyo.getDY() + turnSpeed * stickoboyo.getDZ());
-		talRB.set(teleSpeed * stickoboyo.getDY() + turnSpeed * stickoboyo.getDZ());
-		
+		talRB.set(teleSpeed * stickoboyo.getDY() + turnSpeed * stickoboyo.getDZ());		
 	}
 	
 	public void grabberGrab() { // Spins belt in/out
@@ -404,7 +428,7 @@ public class RobotInstance { // Declares robot components
 		if(stickoboyo.getButtonPress(3)) {
 			boolean val = stickoboyo.getButtonToggle(3);
 			solGrabber1.set(val);
-			solGrabber2.set(val);
+			solGrabber2.set(!val);
 		}
 		
 	}
@@ -420,14 +444,28 @@ public class RobotInstance { // Declares robot components
 		}
 		
 		// B section
-		if(stickoboyo.getButton(4) && !stickoboyo.getButton(6) && !limBottomB.get()) {
+		if(stickoboyo.getButton(4) && !stickoboyo.getButton(6)/* && !limBottomB.get()*/) {
 			outputB = -liftSpeed; // down
-		} else if(!stickoboyo.getButton(4) && stickoboyo.getButton(6) && !limTopB.get()) {
+		} else if(!stickoboyo.getButton(4) && stickoboyo.getButton(6)/* && !limTopB.get()*/) {
 			outputB = liftSpeed; // up
 		}
 		// Set motor speed at end
 		talLiftA.set(outputA);
 		talLiftB.set(outputB);
 	}
+	
+
+	public void SmartDashUpdate() {
+		/*SmartDashboard.putNumber("talLF", talLF.get());
+		SmartDashboard.putNumber("talLB", talLB.get());
+		SmartDashboard.putNumber("talRF", talRF.get());
+		SmartDashboard.putNumber("talRB", talRB.get());
+		SmartDashboard.putNumber("gyroAngle", getGyroAngle());
+		SmartDashboard.putNumber("teleSpeed", teleSpeed);
+		SmartDashboard.putNumber("turnSpeed", turnSpeed);
+		SmartDashboard.putNumber("smoothing", driveSmoothing);
+		SmartDashboard.putBoolean("smoothSteering", smoothSteering);
+		SmartDashboard.updateValues();*/
 		
+	}
 }
